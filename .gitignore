@@ -1,0 +1,61 @@
+# Visual Studio och Rider
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Bin & obj-folders (byggfiler)
+bin/
+obj/
+out/
+TestResults/
+*.exe
+*.dll
+*.pdb
+*.appx
+*.appxbundle
+*.msi
+*.nupkg
+*.snupkg
+*.psmdcp
+*.coverage
+*.coveragexml
+
+# Logs
+*.log
+logs/
+
+# Paket och caches
+packages/
+node_modules/
+project.lock.json
+global.json
+.nuget/
+*.nupkg
+*.snupkg
+*.lock.json
+
+# Konfigurationsfiler
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
+secrets.json
+connectionstring.txt
+
+# Database-filer
+*.db
+*.sqlite
+*.mdf
+*.ldf
+
+# Mac & Linux-filer
+.DS_Store
+*.swp
+*.swo
+*.swn
+
+# IDE-specifika inställningar
+*.vscode/
+*.code-workspace

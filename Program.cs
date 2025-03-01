@@ -1,197 +1,92 @@
-﻿using System.Runtime.CompilerServices;
-
+﻿using System;
+using System.Threading.Tasks;
 
 class Program
 {
-    static List<Bil> lager = new List<Bil>
-        {
-            new Bil(1,"Volvo", "XC60,", 2020, 25000, "Automat", null, "Tillgänglig"),
-            new Bil(2, "Toyota", "Corolla", 2018, 45000, "Manuell", null, "Tillgänglig"),
-            new Bil(3, "Ford", "Mustang", 2022, 5000, "Automat", null, "Tillgänglig")
-        };
-     
-    static void Main()
+    static async Task Main()
     {
-        bool avslutaProgrammet = false;
+        try
+        {
+            var dbRepository = new DatabaseRepository("Server=gondolin667.org;Database=yhstudent93_MyFirstDataBase;User Id=yhstudent93;Password=lzXDn1gKfFXh;TrustServerCertificate=True;");
 
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("Välkommen till vår bilfirma!");
+                Console.WriteLine("1: Köpare  2: Säljare  3: Personal  4: Avsluta");
+                var choice = Console.ReadLine();
 
-        while(!avslutaProgrammet)
+                if (choice == "4") break;
+
+                switch (choice)
+                {
+                    case "1": await KöpareMeny(dbRepository); break;
+                    case "2": await SäljareMeny(dbRepository); break;
+                    case "3": await PersonalMeny(dbRepository); break;
+                    default: Console.WriteLine("Fel val, försök igen."); break;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ett fel uppstod: {ex.Message}");
+        }
+    }
+
+    static async Task KöpareMeny(DatabaseRepository db)
+    {
+        var köpare = new Köpare("Köpare", db);
+        while (true)
         {
             Console.Clear();
-            Console.WriteLine("Välkommen till våran Bilfirma!");
-            Console.WriteLine("Välj din roll / Avsluta ");
-            Console.WriteLine("'1' Köpare  '2' Säljare  '3' Personal  '4' Avsluta");
-           
+            Console.WriteLine("1: Visa lager  2: Köp bil  3: Tillbaka");
+            var choice = Console.ReadLine();
+            if (choice == "3") break;
+
+            if (choice == "1") await köpare.VisaLagerAsync();
+            else if (choice == "2") await köpare.KöpBilAsync();
+        }
+    }
+
+    static async Task SäljareMeny(DatabaseRepository db)
+    {
+        var säljare = new Säljare("Säljare", db);
+        while (true)
+        {
+            Console.Clear();
+            Console.WriteLine("1: Visa lager  2: Lägg till bil  3: Tillbaka");
+            var choice = Console.ReadLine();
+            if (choice == "3") break;
+
+            if (choice == "1") await säljare.VisaLagerAsync();
+            else if (choice == "2") await säljare.LäggTillBilAsync();
+        }
+    }
+
+    static async Task PersonalMeny(DatabaseRepository db)
+    {
+        var personal = new Personal("Personal", db);
+        while (true)
+        {
+            Console.Clear();
+            Console.WriteLine("1: Visa lager  2: Uppdatera bilstatus  3: Visa försäljningshistorik");
+            Console.WriteLine("4: Lägg till underhåll  5: Visa underhållshistorik  6: Lägg till reservdel");
+            Console.WriteLine("7: Visa statistik  8: Tillbaka");
             var choice = Console.ReadLine();
 
+            if (choice == "8") break;
 
             switch (choice)
             {
-                case "1":
-                    KöpareMeny();
-                    break;
-                case "2":
-                    SäljareMeny();
-                    break;
-                case "3":
-                    PersonalMeny();
-                    break;
-                case "4":
-                    Console.WriteLine("Avslutar programmet...");
-                    avslutaProgrammet = true;
-                    break;
-                default:
-                    Console.WriteLine("Error, försök igen.");
-                    break;
+                case "1": await personal.VisaLagerAsync(); break;
+                case "2": await personal.UppdateraBilStatusAsync(); break;
+                case "3": await personal.VisaFörsäljningshistorikAsync(); break;
+                case "4": await personal.LäggTillUnderhållAsync(); break;
+                case "5": await personal.VisaUnderhållshistorikAsync(); break;
+                case "6": await personal.LäggTillReservdelAsync(); break;
+                case "7": await personal.VisaStatistikAsync(); break;
+                default: Console.WriteLine("Fel val, försök igen."); break;
             }
         }
     }
-
-
-    static void KöpareMeny()
-    {
-        Köpare köpare = new Köpare("Köpare");
-        bool tillbakaTillHuvudmeny = false;
-
-
-        while(!tillbakaTillHuvudmeny)
-        {
-            Console.Clear();
-            Console.WriteLine("Meny för köpare:");
-            Console.WriteLine("1. Visa lagerstatus");
-            Console.WriteLine("2. Köp din dröm bil!");
-            Console.WriteLine("3. Tilbaka till huvudmenyn");
-
-
-            var choice = Console.ReadLine();
-
-
-            switch (choice)
-            {
-                case "1":
-                    köpare.VisaLagerStatus(lager);
-                    Console.WriteLine("\nTryck på valfri tangent för att fortsätta...");
-                    Console.ReadKey();
-                    break;
-
-
-                case "2":
-                    köpare.KöpBil(lager);
-                    Console.WriteLine("\nTryck på valfri tangent för att fortsätta...");
-                    Console.ReadKey();
-                    break;
-               
-                case "3":
-                    tillbakaTillHuvudmeny = true;
-                    break;
-               
-                default:
-                    Console.WriteLine("Error, försök igen.");
-                    break;
-            }
-        }
-    }
-
-
-
-
-
-
-    static void SäljareMeny()
-    {
-        Säljare säljare = new Säljare("Säljare");
-        bool tillbakaTillHuvudmeny = false;
-
-
-        while (!tillbakaTillHuvudmeny)
-        {
-            Console.Clear();
-            Console.WriteLine("Meny för säljare:");
-            Console.WriteLine("1. Visa lagerstatus");
-            Console.WriteLine("2. Sälj din bil");
-            Console.WriteLine("3. Tilbaka till huudmenyn");
-
-
-            var choice = Console.ReadLine();
-
-
-            switch (choice)
-            {
-                case "1":
-                    säljare.VisaLagerStatus(lager);
-                    Console.WriteLine("\nTryck på valfri tangent för att fortsätta...");
-                    Console.ReadKey();
-                    break;
-               
-                case "2":
-                    säljare.Säljbil(lager);
-                    Console.WriteLine("\nTryck på valfri tangent för att fortsätta...");
-                    Console.ReadKey();
-                    break;
-               
-                case "3":
-                    tillbakaTillHuvudmeny = true;
-                    break;
-               
-                default:
-                    Console.WriteLine("Error, försök igen.");
-                    break;
-            }
-        }
-    }
-
-
-    static void PersonalMeny()
-    {
-        Personal personal = new Personal("Admin");
-        bool tillbakaTillHuvudmeny = false;
-
-
-        while (!tillbakaTillHuvudmeny)
-        {
-            Console.Clear();
-            Console.WriteLine("Meny för personal:");
-            Console.WriteLine("1. Visa lagerstatus");
-            Console.WriteLine("2. Uppdatera bilstatus (sätt pris och status)");
-            Console.WriteLine("3. Visa försäljningshistorik");
-            Console.WriteLine("4. Gå tillbaka till huvudmenyn");
-
-
-            var choice = Console.ReadLine();
-            switch (choice)
-            {
-                case "1":
-                    personal.VisaLagerStatus(Program.lager);
-                    Console.WriteLine("\nTryck på valfri tangent för att fortsätta...");
-                    Console.ReadKey();
-                    break;
-
-
-                case "2":
-                    personal.UppdateraBilStatus(Program.lager);
-                    Console.WriteLine("\nTryck på valfri tangent för att fortsätta...");
-                    Console.ReadKey();
-                    break;
-
-
-                case "3":
-                    personal.VisaFörsäljningshistorik();
-                    Console.WriteLine("\nTryck på valfri tangent för att fortsätta...");
-                    Console.ReadKey();
-                    break;
-
-
-                case "4":
-                    tillbakaTillHuvudmeny = true;
-                    break;
-
-
-                default:
-                    Console.WriteLine("Error, försök igen.");
-                    break;
-        }
-    }
-}
-       
-   
 }

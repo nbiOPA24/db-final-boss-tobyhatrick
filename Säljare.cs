@@ -1,89 +1,88 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 public class Säljare : Användare
 {
-    public Säljare(string namn) : base(namn, "Säljare") { }
-
-
-    public void VisaLagerStatus(List<Bil> lager)
+    public Säljare(string namn, DatabaseRepository dbRepository) 
+        : base(namn, "Säljare", dbRepository)
     {
-        Console.WriteLine("Status på våra bilar i lager just nu");
-        foreach (var Bil in lager)
-        {
-            Bil.DisplayInfo();
-        }
     }
 
-
-    public void Säljbil(List<Bil> lager)
+    public async Task VisaLagerAsync()
     {
-        Console.WriteLine("Här kan du sälja din bil:");
+        var bilar = await _dbRepository.HämtaAllaBilarAsync();
 
+        // Filtrera bort sålda bilar
+        var tillgängligaBilar = bilar.Where(b => b.Status != "Såld");
 
-        while (true)
+        Console.WriteLine("Tillgängliga bilar:");
+        foreach (var bil in tillgängligaBilar)
         {
-            Console.Clear();
-            Random random = new Random();
-            int id = random.Next(1,101);
-           
-            Console.WriteLine("--------------------------");
+            Console.WriteLine($"ID: {bil.Id} -- Märke: {bil.Märke} -- Modell: {bil.Modell} -- Årsmodell: {bil.Årsmodell} -- Pris: {bil.Pris:C} -- Status: {bil.Status}");                              
+        }
 
+        // Lägg till en paus
+        Console.WriteLine("\nTryck på valfri tangent för att fortsätta...");
+        Console.ReadKey();
+    }
 
-            // Märke
-            Console.Write("Ange märke: ");
-            string? märke = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(märke))
-            {
-                Console.WriteLine("Error - Märket kan inte vara tomt");
-                continue;
-            }
+    public async Task LäggTillBilAsync()
+    {
+        try
+        {
+            Console.WriteLine("Lägg till en ny bil till försäljning!");
 
+            Console.Write("Märke: ");
+            string märke = Console.ReadLine() ?? "";
 
-            // Modell
-            Console.Write("Ange modell: ");  
-            string? modell = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(modell))
-            {
-                Console.WriteLine("Error - Ange en giltig Modell");
-                continue;
-            }
+            Console.Write("Modell: ");
+            string modell = Console.ReadLine() ?? "";
 
-
-            // Miltal
-            Console.Write("Ange miltal: ");
-            if (!int.TryParse(Console.ReadLine(), out int miltal))
-            {
-                Console.WriteLine("Error - Ange ett giltigt nummer för Miltal");
-                continue;
-            }
-
-
-            // Växellåda
-            Console.Write("Automat/Manual: ");
-            string? växellåda = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(växellåda))
-            {
-                Console.WriteLine("Error - Växellådan kan bara vara Automat eller Manual");
-                continue;
-            }
-
-
-            // Årsmodell
-            Console.Write("Ange årsmodell: ");
+            Console.Write("Årsmodell: ");
             if (!int.TryParse(Console.ReadLine(), out int årsmodell))
             {
-                Console.WriteLine("Error - Årsmodell måste vara ett giltigt nummer");
-                continue;
+                Console.WriteLine("Felaktig inmatning! Årsmodell måste vara ett nummer.");
+                return;
             }
 
+            Console.Write("Miltal: ");
+            if (!int.TryParse(Console.ReadLine(), out int miltal))
+            {
+                Console.WriteLine("Felaktig inmatning! Miltal måste vara ett nummer.");
+                return;
+            }
 
-            // Skapa och lägg till bilen
-            string status = "Tillgänglig";
-           
-            Bil nyBil = new Bil(id, märke, modell, årsmodell, miltal, växellåda, null, status);
-            lager.Add(nyBil);
+            Console.Write("Växellåda (Manuell/Automat): ");
+            string växellåda = Console.ReadLine() ?? "";
 
+            Console.Write("Pris: ");
+            if (!decimal.TryParse(Console.ReadLine(), out decimal pris))
+            {
+                Console.WriteLine("Felaktig inmatning! Pris måste vara ett nummer.");
+                return;
+            }
 
-            Console.WriteLine($"Din bil har nu lagts till i lagret med ID: {nyBil.Id}");
-            break; // Avsluta loopen när allt är giltigt och bilen har lagts till
+            // Skapa ett nytt bilobjekt
+            var nyBil = new Bil(märke, modell, årsmodell, miltal, växellåda, pris);
+
+            // Bekräfta med användaren
+            Console.WriteLine($"Är du säker på att du vill lägga till en {märke} {modell} för säljning? (ja/nej)");
+            string bekräftelse = Console.ReadLine();
+            if (bekräftelse.ToLower() != "ja")
+            {
+                Console.WriteLine("Bilen har inte lagts till i systemet.");
+                return;
+            }
+
+            // Lägg till bilen i databasen
+            await _dbRepository.LäggTillBilAsync(nyBil);
+            Console.WriteLine($"Bilen {märke} {modell} har lagts till i systemet!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ett fel uppstod vid tillägg av bil: {ex.Message}");
+            Console.WriteLine("Försök igen eller kontakta support.");
         }
     }
 }

@@ -2,14 +2,20 @@ public class Reservdel
 {
     public int Id { get; set; }
     public string Namn { get; set; }
-    public int LagerAntal { get; set; }
     public decimal Pris { get; set; }
+    public int BilId { get; set; }
 
-    public Reservdel(int id, string namn, int lagerAntal, decimal pris)
+    // Parameterlös konstruktor
+    public Reservdel()
+    {
+        Namn = string.Empty; // Sätt ett standardvärde för Namn
+    }
+
+    public Reservdel(int id, string namn, decimal pris, int bilId)
     {
         Id = id;
         Namn = namn;
-        LagerAntal = lagerAntal;
         Pris = pris;
+        BilId = bilId;
     }
 }

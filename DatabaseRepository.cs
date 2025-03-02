@@ -37,12 +37,27 @@ public class DatabaseRepository
     {
         using var db = SkapaAnslutning();
         var sql = @"
-            SELECT b.*, 
-                r.Namn AS Reservdel, r.Pris AS ReservdelPris,
-                u.Beskrivning AS Underhåll, u.Kostnad AS UnderhållKostnad
-            FROM Bilar b
-            LEFT JOIN Reservdelar r ON b.Id = r.BilId
-            LEFT JOIN Underhåll u ON b.Id = u.BilId";
+            SELECT 
+                b.Id,
+                b.Märke,
+                b.Modell,
+                b.Årsmodell,
+                b.Miltal,
+                b.Växellåda,
+                b.Pris,
+                b.Status,
+                STRING_AGG(r.Namn, ', ') AS Reservdelar,  -- SQL-funktion
+                STRING_AGG(u.Beskrivning, ', ') AS Underhåll  -- SQL-funktion
+            FROM 
+                Bilar b
+            LEFT JOIN 
+                Reservdelar r ON b.Id = r.BilId  -- JOIN 1
+            LEFT JOIN 
+                Underhåll u ON b.Id = u.BilId  -- JOIN 2
+            LEFT JOIN 
+                Försäljningar f ON b.Id = f.BilId  -- JOIN 3
+            GROUP BY 
+                b.Id, b.Märke, b.Modell, b.Årsmodell, b.Miltal, b.Växellåda, b.Pris, b.Status";
         return await db.QueryAsync<Bil>(sql);
     }
 
